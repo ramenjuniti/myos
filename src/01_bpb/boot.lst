@@ -1,0 +1,16 @@
+     1                                  ; エントリポイント
+     2                                  entry:
+     3 00000000 EB58                        jmp ipl
+     4                                  
+     5                                      ; BPB(BIOS Parameter Block)
+     6 00000002 90<rept>                    times 90 - ($ - $$) db 0x90
+     7                                  
+     8                                      ; IPL(Initial Program Loader)
+     9                                  ipl:
+    10                                  
+    11                                      ; 処理の終了
+    12 0000005A EBFE                        jmp $
+    13                                  
+    14                                  ; ブートフラグ(先頭512バイトの終了)
+    15 0000005C 00<rept>                    times 510 - ($ - $$) db 0x00
+    16 000001FE 55AA                        db 0x55, 0xAA

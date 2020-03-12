@@ -8,3 +8,11 @@
 brew install nasm
 brew install bochs
 ```
+
+## Run
+
+```
+cd src/{target directory}
+sh ../../env/mk.sh
+sh ../../env/box.sh
+```

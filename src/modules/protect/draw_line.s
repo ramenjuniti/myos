@@ -1,50 +1,157 @@
 draw_line:
-    ;------------------------
-    ; ステックフレームの構築
-    ;------------------------
-    push ebp
-    mov ebp, esp
+        ;-----------------------------------------
+        ; 【スタックフレームの構築】
+        ;-----------------------------------------
+        push ebp
+        mov ebp, esp
 
-    push dword 0                    ;   -4|   sum = 0; // 相対軸の積算値
-    push dword 0                    ;   -8|    x0 = 0; // X座標
-    push dword 0                    ;  -12|    dx = 0; // X増分
-    push dword 0                    ;  -16| inc_x = 0; // X座標増分(1 or -1)
-    push dword 0                    ;  -20|    x0 = 0; // Y座標
-    push dword 0                    ;  -24|    dx = 0; // Y増分
-    push dword 0                    ;  -28| inc_x = 0; // Y座標増分(1 or -1)
+        push dword 0
+        push dword 0
+        push dword 0
+        push dword 0
+        push dword 0
+        push dword 0
+        push dword 0
 
-    ;------------------------
-    ; レジスタに保存
-    ;------------------------
-    push eax
-    push ebx
-    push ecx
-    push edx
-    push esi
-    push edi
+        ;-----------------------------------------
+        ; 【レジスタの保存】
+        ;-----------------------------------------
+        push eax
+        push ebx
+        push ecx
+        push edx
+        push esi
+        push edi
 
-    ;-------------------------
-    ; 幅を計算（x軸）
-    ;-------------------------
-    mov eax, [ebp + 8]              ; EAX = X0;
-    mov ebx, [ebp + 16]             ; EBX = X1;
-    sub ebx, eax                    ; EBX = X1 - X0; // 幅
-    jge .10F                        ; if (幅 < 0)
-                                    ; {
-    neg ebx                         ;   幅 *= -1;
-    mov esi, -1                     ;   // X座標の増分
-    jmp .10E                        ; }
-.10F:                               ; else
-                                    ; {
-    mov esi, 1                      ;   // X座標
-.10E:                               ; }
+        ;-----------------------------------------
+        ; 幅を計算(X軸)
+        ;-----------------------------------------
+        mov eax, [ebp + 8]
+        mov ebx, [ebp + 16]
+        sub ebx, eax
+        jge .10F
 
-    ;--------------------------
-    ; 高さを計算（y軸）
-    ;--------------------------
-    mov ecx, [ebp + 12]             ; ECX = Y0
-    mov edx, [ebp + 20]             ; EDX = Y1
-    sub edx, ecx                    ; EDX = Y1 - Y0; // 高さ
-    jge .20F                        ; if (高さ < 0)
-                                    ; {
-                                        
+        neg ebx
+        mov esi, -1
+        jmp .10E
+.10F:
+        mov esi, 1
+.10E:
+
+        ;-----------------------------------------
+        ; 高さを計算(Y軸)
+        ;-----------------------------------------
+        mov ecx, [ebp + 12]
+        mov edx, [ebp + 20]
+        sub edx, ecx
+        jge .20F
+
+        neg edx
+        mov edi, -1
+        jmp .20E
+.20F:
+        mov edi, 1
+.20E:
+
+        ;-----------------------------------------
+        ; X軸
+        ;-----------------------------------------
+        mov [ebp - 8], eax
+        mov [ebp - 12], ebx
+        mov [ebp - 16], esi
+
+        ;-----------------------------------------
+        ; Y軸
+        ;-----------------------------------------
+        mov [ebp - 20], ecx
+        mov [ebp - 24], edx
+        mov [ebp - 28], edi
+
+        ;-----------------------------------------
+        ; 基準軸を決める
+        ;-----------------------------------------
+        cmp ebx, edx
+        jg .22F
+
+        lea esi, [ebp - 20]
+        lea edi, [ebp - 8]
+
+        jmp .22E
+.22F:
+        lea esi, [ebp - 8]
+        lea edi, [ebp - 20]
+.22E:
+
+        ;-----------------------------------------
+        ; 繰り返し回数(基準軸のドット数)
+        ;-----------------------------------------
+        mov ecx, [esi - 4]
+        cmp ecx, 0
+        jnz .30E
+        mov ecx, 1
+.30E:
+
+        ;-----------------------------------------
+        ; 線を描画
+        ;-----------------------------------------
+.50L:
+
+%ifdef  USE_SYSTEM_CALL
+        mov eax, ecx
+
+        mov ebx, [ebp + 24]
+        mov ecx, [ebp - 8]
+        mov edx, [ebp - 20]
+        int 0x82
+
+        mov ecx, eax
+%else
+        cdecl draw_pixel, dword [ebp - 8], dword [ebp - 20], dword [ebp + 24]
+%endif
+
+        mov eax, [esi - 8]
+        add [esi - 0], eax
+
+        mov eax, [ebp - 4]
+        add eax, [edi - 4]
+        mov ebx, [esi - 4]
+
+        cmp eax, ebx
+        jl .52E
+        sub eax, ebx
+
+        mov ebx, [edi - 8]
+        add [edi - 0], ebx
+.52E:
+        mov [ebp - 4], eax
+
+        loop .50L
+.50E:
+
+        ;-----------------------------------------
+        ; 【レジスタの復帰】
+        ;-----------------------------------------
+        pop edi
+        pop esi
+        pop edx
+        pop ecx
+        pop ebx
+        pop eax
+
+        ;-----------------------------------------
+        ; 【スタックフレームの破棄】
+        ;-----------------------------------------
+        mov esp, ebp
+        pop ebp
+
+        ret
+
+.s0:    db '        ', 0
+.t0:    dw 0x0000, 0x0800
+        dw 0x0100, 0x0900
+        dw 0x0200, 0x0A00
+        dw 0x0300, 0x0B00
+        dw 0x0400, 0x0C00
+        dw 0x0500, 0x0D00
+        dw 0x0600, 0x0E00
+        dw 0x0700, 0x0F00

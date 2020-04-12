@@ -49,7 +49,7 @@ init_int:
         ret
 
 int_default:
-        pushf
+        pushf                                           ; // EFLAGS(IF == 0)
         push cs
         push int_stop
 
@@ -59,6 +59,8 @@ int_default:
 .s0:    db " <    STOP    > ", 0
 
 int_stop:
+        sti
+        
         ;-----------------------------------------
         ; EAXで示される文字列を表示
         ;-----------------------------------------

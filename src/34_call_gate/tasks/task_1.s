@@ -9,8 +9,8 @@ task_1:
         ;-----------------------------------------
         ; 時刻の表示
         ;-----------------------------------------
-        mov eax, [RTC_TIME]
-        cdecl draw_time, 72, 0, 0x0700, eax
+;       mov eax, [RTC_TIME]
+;       cdecl draw_time, 72, 0, 0x0700, eax
 
         jmp .10L
 

@@ -29,7 +29,11 @@ draw_str:
     cmp al, 0                       ;   if (0 == AL)
     je .10E                         ;       break;
 
+%ifdef USE_SYSTEM_CALL
+    int 0x81                            ; sys_call(1, X, Y, 色, 文字)
+%else
     cdecl draw_char, ecx, edx, ebx, eax ; draw_char();
+%endif
 
     inc ecx                         ;   ECX = 0; // 列を加算
     cmp ecx, 80                     ;   if (80 <= ECX) // 80文字以上?

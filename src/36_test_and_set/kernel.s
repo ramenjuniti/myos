@@ -155,6 +155,9 @@ RTC_TIME: dd 0
 %include "../modules/protect/ring_buff.s"
 %include "../modules/protect/timer.s"
 %include "../modules/protect/draw_rotation_bar.s"
+%include "../modules/protect/call_gate.s"
+%include "../modules/protect/trap_gate.s"
+%include "../modules/protect/test_and_set.s"
 
 ;***********************************************************
 ;  パディング

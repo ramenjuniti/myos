@@ -85,22 +85,36 @@
     58                              <1>         pop eax
     59                              <1> %endmacro
     60                              <1> 
-    61                              <1> 
-    62                              <1> struc drive
-    63 00000000 <res 00000002>      <1>     .no resw 1      ; ドライブ番号
-    64 00000002 <res 00000002>      <1>     .cyln resw 1    ; シリンダ
-    65 00000004 <res 00000002>      <1>     .head resw 1    ; ヘッド
-    66 00000006 <res 00000002>      <1>     .sect resw 1    ; セクタ
-    67                              <1> endstruc
-    68                              <1> 
-    69                              <1> %define RING_ITEM_SIZE (1 << 4)
-    70                              <1> %define RING_INDEX_MASK (RING_ITEM_SIZE - 1)
+    61                              <1> %macro set_gate 2-*
+    62                              <1>         push eax
+    63                              <1>         push edi
+    64                              <1> 
+    65                              <1>         mov edi, %1             ; ディスクリプタアドレス
+    66                              <1>         mov eax, %2             ; ベースアドレス
+    67                              <1> 
+    68                              <1>         mov [edi + 0], ax       ; ベース([15: 0])
+    69                              <1>         shr eax, 16
+    70                              <1>         mov [edi + 6], ax       ; ベース([31:16])
     71                              <1> 
-    72                              <1> struc ring_buff
-    73 00000000 <res 00000004>      <1>     .rp resd 1                  ; RP:読み込み位置
-    74 00000004 <res 00000004>      <1>     .wp resd 1                  ; WP:書き込み位置　
-    75 00000008 <res 00000010>      <1>     .item resb RING_ITEM_SIZE   ; バッファ
-    76                              <1> endstruc
+    72                              <1>         pop edi
+    73                              <1>         pop eax
+    74                              <1> %endmacro
+    75                              <1> 
+    76                              <1> struc drive
+    77 00000000 <res 00000002>      <1>     .no resw 1      ; ドライブ番号
+    78 00000002 <res 00000002>      <1>     .cyln resw 1    ; シリンダ
+    79 00000004 <res 00000002>      <1>     .head resw 1    ; ヘッド
+    80 00000006 <res 00000002>      <1>     .sect resw 1    ; セクタ
+    81                              <1> endstruc
+    82                              <1> 
+    83                              <1> %define RING_ITEM_SIZE (1 << 4)
+    84                              <1> %define RING_INDEX_MASK (RING_ITEM_SIZE - 1)
+    85                              <1> 
+    86                              <1> struc ring_buff
+    87 00000000 <res 00000004>      <1>     .rp resd 1                  ; RP:読み込み位置
+    88 00000004 <res 00000004>      <1>     .wp resd 1                  ; WP:書き込み位置　
+    89 00000008 <res 00000010>      <1>     .item resb RING_ITEM_SIZE   ; バッファ
+    90                              <1> endstruc
      6                                  
      7                                          ORG BOOT_LOAD
      8                                  

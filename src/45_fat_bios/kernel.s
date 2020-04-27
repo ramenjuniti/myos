@@ -154,6 +154,21 @@ kernel:
         mov [esi + 32], byte 0
         cdecl draw_str, 0, 0, 0x0F04, esi
 .12E:
+
+        ;------------------------------------------
+        ; CTAL + ALT + ENDキー
+        ;------------------------------------------
+        mov al, [.int_key]
+        cdecl ctrl_alt_end, eax
+        cmp eax, 0
+        je .14E
+
+        mov eax, 0
+        bts [.once], eax
+        jc .14E
+        cdecl power_off
+
+.14E:
 .10E:
         jmp .10L
 
@@ -161,6 +176,7 @@ kernel:
 
 ALIGN 4, db 0
 .int_key: dd 0
+.once:  dd 0
 
 ALIGN 4, db 0
 FONT_ADR: dd 0
@@ -204,6 +220,11 @@ RTC_TIME: dd 0
 %include "../modules/protect/int_nm.s"
 %include "../modules/protect/wait_tick.s"
 %include "../modules/protect/memcpy.s"
+%include "../modules/protect/ctrl_alt_end.s"
+%include "../modules/protect/power_off.s"
+%include "../modules/protect/acpi_find.s"
+%include "../modules/protect/find_rsdt_entry.s"
+%include "../modules/protect/acpi_package_value.s"
 
 ;***********************************************************
 ;  パディング

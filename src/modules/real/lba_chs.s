@@ -1,4 +1,4 @@
-memcpy:
+lba_chs:
         ;-----------------------------------------
         ; 【スタックフレームの構築】
         ;-----------------------------------------
@@ -8,26 +8,47 @@ memcpy:
         ;-----------------------------------------
         ; 【レジスタの保存】
         ;-----------------------------------------
-        push cx
+        push ax
+        push bx
+        push dx
         push si
         push di
 
         ;-----------------------------------------
-        ; バイト単位でのコピー
+        ; セクタ数の計算
         ;-----------------------------------------
-        cld
-        mov di, [bp + 4]
-        mov si, [bp + 6]
-        mov cx, [bp + 8]
+        mov si, [bp + 4]
+        mov di, [bp + 6]
 
-        rep movsb
+        mov al, [si + drive.head]
+        mul byte [si + drive.sect]
+        mov bx, ax
+
+        mov dx, 0
+        mov ax, [bp + 8]
+        div bx
+
+        mov [di + drive.cyln], ax
+
+        mov ax, dx
+        div byte [si + drive.sect]
+
+        movzx dx, ah
+        inc dx
+
+        mov ah, 0x00
+
+        mov [di + drive.head], ax
+        mov [di + drive.sect], dx
 
         ;-----------------------------------------
         ; 【レジスタの復帰】
         ;-----------------------------------------
         pop di
         pop si
-        pop cx
+        pop dx
+        pop bx
+        pop ax
 
         ;-----------------------------------------
         ; 【スタックフレームの破棄】
